@@ -57,12 +57,19 @@ SceneTitle.prototype.init = function(){
 
 	this.mvpMatrix = glmat.mat4.create();
 	*/
+
+	this.mvMatrix = glmat.mat4.create();
+	this.pMatrix  = glmat.mat4.create();
 };
 
 SceneTitle.prototype.beforeDraw = function(){
 	base_scene.prototype.beforeDraw.apply(this, arguments);
 
 	/*
+
+	// 入力を取得
+	this.handleInput();
+
 	// カメラ更新
 	this.camera.moveCenter([0.0, 0.0, 0.0]);
 	this.camera.updateMatrix();
@@ -93,6 +100,8 @@ SceneTitle.prototype.beforeDraw = function(){
 
 SceneTitle.prototype.draw = function(){
 	var gl = this.core.gl;
+	gl.clearColor(0.0, 0.0, 0.0, 1.0);
+	gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 	/*
 	// Canvasの大きさとビューポートの大きさを合わせる
 	this.core.gl.viewport(0, 0, this.core.width, this.core.height);
@@ -175,5 +184,19 @@ SceneTitle.prototype.attribSetup = function(attribute_location, buffer_object, s
 	this.core.gl.vertexAttribPointer(attribute_location, size, type, false, 0, 0);
 
 };
+
+/*
+Layer.prototype.ortho = function(near, far) {
+  mat4.ortho(-this.gl.viewportWidth/2,
+              this.gl.viewportWidth/2,
+             -this.gl.viewportHeight/2,
+              this.gl.viewportHeight/2,
+              near, far, this.pMatrix);
+};
+*/
+
+
+
+
 module.exports = SceneTitle;
 
