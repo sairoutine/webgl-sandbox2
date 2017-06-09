@@ -17,7 +17,10 @@ Player.prototype.spriteName = function(){
 	return "player";
 };
 Player.prototype.spriteIndices = function(){
-	return [{x: 0, y: 0}];
+	return [{x: 0, y: 0}, {x: 1, y: 0}, {x: 2, y: 0}];
+};
+Player.prototype.spriteAnimationSpan = function(){
+	return 6;
 };
 Player.prototype.spriteWidth = function(){
 	return 32;
