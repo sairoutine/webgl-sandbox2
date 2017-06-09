@@ -50,21 +50,19 @@ SceneTitle.prototype.beforeDraw = function(){
 	// 画面外に出させない
 	this.player.forbidOutOfStage();
 
-	/*
 	// 左右の移動に合わせて自機のアニメーションを変更
-	if(this.game.isKeyDown(Constant.BUTTON_LEFT) && !this.game.isKeyDown(Constant.BUTTON_RIGHT)) {
+	if(this.core.isKeyDown(CONSTANT.BUTTON_LEFT) && !this.core.isKeyDown(CONSTANT.BUTTON_RIGHT)) {
 		// 左移動中
-		character.animateLeft();
+		this.player.animateLeft();
 	}
-	else if(this.game.isKeyDown(Constant.BUTTON_RIGHT) && !this.game.isKeyDown(Constant.BUTTON_LEFT)) {
+	else if(this.core.isKeyDown(CONSTANT.BUTTON_RIGHT) && !this.core.isKeyDown(CONSTANT.BUTTON_LEFT)) {
 		// 右移動中
-		character.animateRight();
+		this.player.animateRight();
 	}
 	else {
 		// 左右には未移動
-		character.animateNeutral();
+		this.player.animateNeutral();
 	}
-	*/
 };
 
 
