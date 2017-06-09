@@ -3,9 +3,6 @@
 var base_scene = require('../hakurei').scene.base;
 var util = require('../hakurei').util;
 var CONSTANT = require('../hakurei').constant;
-var ShaderProgram = require('../shader_program');
-var VS = require('../shader/main.vs');
-var FS = require('../shader/main.fs');
 var glmat = require("gl-matrix");
 var Player = require('../object/player');
 
@@ -50,10 +47,8 @@ SceneTitle.prototype.beforeDraw = function(){
 		this.player.y(this.player.y() - MOVE_NUM);
 	}
 
-	/*
 	// 画面外に出させない
-	character.forbidOutOfStage();
-	*/
+	this.player.forbidOutOfStage();
 
 	/*
 	// 左右の移動に合わせて自機のアニメーションを変更

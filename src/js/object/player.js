@@ -28,4 +28,29 @@ Player.prototype.spriteWidth = function(){
 Player.prototype.spriteHeight = function(){
 	return 48;
 };
+
+Player.prototype.forbidOutOfStage = function(){
+	if(this.x() < 0) {
+		this.x(0);
+	}
+	if(this.x() > this.core.width) {
+		this.x(this.core.width);
+	}
+	if(this.y() < 0) {
+		this.y(0);
+	}
+	if(this.y() > this.core.height) {
+		this.y(this.core.height);
+	}
+};
+
+
+
+
+
+
+
+
+
+
 module.exports = Player;
