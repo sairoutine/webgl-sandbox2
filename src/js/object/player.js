@@ -68,6 +68,13 @@ Player.prototype.animateNeutral = function(){
 	this.indexY = 0;
 };
 
+Player.prototype.shot = function(){
+	var SHOT_SPAN = 5;
+	if(this.frame_count % SHOT_SPAN === 0) {
+		this.scene.pool_manager.create(this.x(), this.y());
+	}
+};
+
 
 
 

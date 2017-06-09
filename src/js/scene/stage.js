@@ -2,9 +2,11 @@
 
 var base_scene = require('../hakurei').scene.base;
 var util = require('../hakurei').util;
+var PoolManager = require('../hakurei').object.pool_manager;
 var CONSTANT = require('../hakurei').constant;
 var glmat = require("gl-matrix");
 var Player = require('../object/player');
+var Shot = require('../object/shot');
 
 var SceneTitle = function(core) {
 	base_scene.apply(this, arguments);
@@ -16,20 +18,20 @@ SceneTitle.prototype.init = function(){
 
 	this.player = new Player(this);
 	this.player.init(this.core.width/2, this.core.height/2);
-
 	this.addObject(this.player);
 
+	this.pool_manager = new PoolManager(this, Shot);
+	this.pool_manager.init();
+	this.addObject(this.pool_manager);
 };
 
 SceneTitle.prototype.beforeDraw = function(){
 	base_scene.prototype.beforeDraw.apply(this, arguments);
 
-	/*
 	// Zが押下されていればショット生成
-	if(this.core.isKeyDown(Constant.BUTTON_Z)) {
+	if(this.core.isKeyDown(CONSTANT.BUTTON_Z)) {
 		this.player.shot();
 	}
-	*/
 
 	var MOVE_NUM = 4;
 
