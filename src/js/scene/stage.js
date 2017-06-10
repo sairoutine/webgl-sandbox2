@@ -52,6 +52,9 @@ SceneTitle.prototype.beforeDraw = function(){
 	// 画面外に出させない
 	this.player.forbidOutOfStage();
 
+	// 画面外に出たオブジェクトの削除
+	this.pool_manager.removeOutOfStageObjects();
+
 	// 左右の移動に合わせて自機のアニメーションを変更
 	if(this.core.isKeyDown(CONSTANT.BUTTON_LEFT) && !this.core.isKeyDown(CONSTANT.BUTTON_RIGHT)) {
 		// 左移動中
