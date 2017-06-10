@@ -2,7 +2,7 @@
 
 var base_scene = require('../hakurei').scene.base;
 var util = require('../hakurei').util;
-var PoolManager = require('../hakurei').object.pool_manager;
+var PoolManager = require('../hakurei').object.pool_manager3d;
 var CONSTANT = require('../hakurei').constant;
 var glmat = require("gl-matrix");
 var Player = require('../object/player');
