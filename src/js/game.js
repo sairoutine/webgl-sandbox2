@@ -16,7 +16,7 @@ Game.prototype.init = function () {
 	this.changeSceneWithLoading("stage", {
 		images: {
 			player: "./image/marisa.png",
-			bg: "./image/bg1.jpg",
+			bg: "./image/bg.png",
 			bullet: "./image/bullet_pack.png",
 		}
 	});

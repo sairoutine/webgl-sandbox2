@@ -7,6 +7,8 @@ var CONSTANT = require('../hakurei').constant;
 var glmat = require("gl-matrix");
 var Player = require('../object/player');
 var Shot = require('../object/shot');
+//var Fps = require('../object/fps');
+var Background = require('../object/bg');
 
 var SceneTitle = function(core) {
 	base_scene.apply(this, arguments);
@@ -16,6 +18,10 @@ util.inherit(SceneTitle, base_scene);
 SceneTitle.prototype.init = function(){
 	base_scene.prototype.init.apply(this, arguments);
 
+	var background = new Background(this);
+	background.init(0, 0);
+	this.addObject(background);
+
 	this.player = new Player(this);
 	this.player.init(this.core.width/2, this.core.height/2);
 	this.addObject(this.player);
@@ -23,6 +29,12 @@ SceneTitle.prototype.init = function(){
 	this.pool_manager = new PoolManager(this, Shot);
 	this.pool_manager.init();
 	this.addObject(this.pool_manager);
+
+	/*
+	var fps = new Fps(this);
+	fps.init(10, 10, "FPS: 60");
+	this.addObject(fps);
+	*/
 };
 
 SceneTitle.prototype.beforeDraw = function(){
@@ -69,8 +81,6 @@ SceneTitle.prototype.beforeDraw = function(){
 		this.player.animateNeutral();
 	}
 };
-
-
 
 module.exports = SceneTitle;
 
