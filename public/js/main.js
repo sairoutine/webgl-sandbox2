@@ -6919,7 +6919,7 @@ Game.prototype.init = function () {
 	this.changeSceneWithLoading("stage", {
 		images: {
 			player: "./image/marisa.png",
-			bg: "./image/bg1.jpg",
+			bg: "./image/bg.png",
 			bullet: "./image/bullet_pack.png",
 		}
 	});
@@ -6927,12 +6927,12 @@ Game.prototype.init = function () {
 
 module.exports = Game;
 
-},{"./hakurei":15,"./scene/stage":33}],15:[function(require,module,exports){
+},{"./hakurei":15,"./scene/stage":52}],15:[function(require,module,exports){
 'use strict';
 
 module.exports = require("./hakureijs/index");
 
-},{"./hakureijs/index":21}],16:[function(require,module,exports){
+},{"./hakureijs/index":22}],16:[function(require,module,exports){
 'use strict';
 
 var AudioLoader = function() {
@@ -7209,6 +7209,38 @@ module.exports = Constant;
 },{}],20:[function(require,module,exports){
 'use strict';
 
+var CONSTANT = {
+	SPRITE3D: {},
+};
+
+// vertices
+CONSTANT.SPRITE3D.V_ITEM_SIZE = 3;
+CONSTANT.SPRITE3D.V_ITEM_NUM = 4;
+CONSTANT.SPRITE3D.V_SIZE =
+	CONSTANT.SPRITE3D.V_ITEM_SIZE * CONSTANT.SPRITE3D.V_ITEM_NUM;
+// texture coordinates
+CONSTANT.SPRITE3D.C_ITEM_SIZE = 2;
+CONSTANT.SPRITE3D.C_ITEM_NUM = 4;
+CONSTANT.SPRITE3D.C_SIZE =
+	CONSTANT.SPRITE3D.C_ITEM_SIZE * CONSTANT.SPRITE3D.C_ITEM_NUM;
+
+// indices
+CONSTANT.SPRITE3D.I_ITEM_SIZE = 1;
+CONSTANT.SPRITE3D.I_ITEM_NUM = 6;
+CONSTANT.SPRITE3D.I_SIZE =
+	CONSTANT.SPRITE3D.I_ITEM_SIZE * CONSTANT.SPRITE3D.I_ITEM_NUM;
+
+// color
+CONSTANT.SPRITE3D.A_ITEM_SIZE = 4;
+CONSTANT.SPRITE3D.A_ITEM_NUM = 4;
+CONSTANT.SPRITE3D.A_SIZE =
+	CONSTANT.SPRITE3D.A_ITEM_SIZE * CONSTANT.SPRITE3D.A_ITEM_NUM;
+
+module.exports = CONSTANT;
+
+},{}],21:[function(require,module,exports){
+'use strict';
+
 /* TODO: create input_manager class */
 
 var WebGLDebugUtils = require("webgl-debug");
@@ -7217,6 +7249,10 @@ var ImageLoader = require("./asset_loader/image");
 var AudioLoader = require("./asset_loader/audio");
 var FontLoader = require("./asset_loader/font");
 var SceneLoading = require('./scene/loading');
+
+var ShaderProgram = require('./shader_program');
+var VS = require("./shader/main.vs");
+var FS = require("./shader/main.fs");
 
 var Core = function(canvas, options) {
 	if(!options) {
@@ -7228,9 +7264,32 @@ var Core = function(canvas, options) {
 	this.gl  = null; // 3D context
 
 	if(options.webgl) {
+		// WebGL 3D mode
 		this.gl = this.createWebGLContext(this.canvas_dom);
+
+		// shader program
+		this.sprite_3d_shader = new ShaderProgram(
+			this.gl,
+			// verticle shader, fragment shader
+			VS, FS,
+			// attributes
+			[
+				"aTextureCoordinates",
+				"aVertexPosition",
+				"aColor"
+			],
+			// uniforms
+			[
+				"uMVMatrix",
+				"uPMatrix",
+				"uSampler", // texture data
+			]
+		);
+
+
 	}
 	else {
+		// Canvas 2D mode
 		this.ctx = this.canvas_dom.getContext('2d');
 	}
 
@@ -7629,13 +7688,14 @@ Core.prototype.createWebGLContext = function(canvas) {
 
 module.exports = Core;
 
-},{"./asset_loader/audio":16,"./asset_loader/font":17,"./asset_loader/image":18,"./constant":19,"./scene/loading":27,"webgl-debug":22}],21:[function(require,module,exports){
+},{"./asset_loader/audio":16,"./asset_loader/font":17,"./asset_loader/image":18,"./constant":19,"./scene/loading":40,"./shader/main.fs":42,"./shader/main.vs":43,"./shader_program":44,"webgl-debug":33}],22:[function(require,module,exports){
 'use strict';
 module.exports = {
 	util: require("./util"),
 	core: require("./core"),
 	constant: require("./constant"),
 	serif_manager: require("./serif_manager"),
+	shader_program: require("./shader_program"),
 	scene: {
 		base: require("./scene/base"),
 		loading: require("./scene/loading"),
@@ -7643,7 +7703,9 @@ module.exports = {
 	object: {
 		base: require("./object/base"),
 		sprite: require("./object/sprite"),
+		sprite3d: require("./object/sprite3d"),
 		pool_manager: require("./object/pool_manager"),
+		pool_manager3d: require("./object/pool_manager3d"),
 	},
 	asset_loader: {
 		image: require("./asset_loader/image"),
@@ -7657,7 +7719,27 @@ module.exports = {
 
 };
 
-},{"./asset_loader/audio":16,"./asset_loader/font":17,"./asset_loader/image":18,"./constant":19,"./core":20,"./object/base":23,"./object/pool_manager":24,"./object/sprite":25,"./scene/base":26,"./scene/loading":27,"./serif_manager":28,"./storage/base":29,"./storage/save":30,"./util":31}],22:[function(require,module,exports){
+},{"./asset_loader/audio":16,"./asset_loader/font":17,"./asset_loader/image":18,"./constant":19,"./core":21,"./object/base":34,"./object/pool_manager":35,"./object/pool_manager3d":36,"./object/sprite":37,"./object/sprite3d":38,"./scene/base":39,"./scene/loading":40,"./serif_manager":41,"./shader_program":44,"./storage/base":45,"./storage/save":46,"./util":47}],23:[function(require,module,exports){
+arguments[4][2][0].apply(exports,arguments)
+},{"./gl-matrix/common.js":24,"./gl-matrix/mat2.js":25,"./gl-matrix/mat2d.js":26,"./gl-matrix/mat3.js":27,"./gl-matrix/mat4.js":28,"./gl-matrix/quat.js":29,"./gl-matrix/vec2.js":30,"./gl-matrix/vec3.js":31,"./gl-matrix/vec4.js":32,"dup":2}],24:[function(require,module,exports){
+arguments[4][3][0].apply(exports,arguments)
+},{"dup":3}],25:[function(require,module,exports){
+arguments[4][4][0].apply(exports,arguments)
+},{"./common.js":24,"dup":4}],26:[function(require,module,exports){
+arguments[4][5][0].apply(exports,arguments)
+},{"./common.js":24,"dup":5}],27:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"./common.js":24,"dup":6}],28:[function(require,module,exports){
+arguments[4][7][0].apply(exports,arguments)
+},{"./common.js":24,"dup":7}],29:[function(require,module,exports){
+arguments[4][8][0].apply(exports,arguments)
+},{"./common.js":24,"./mat3.js":27,"./vec3.js":31,"./vec4.js":32,"dup":8}],30:[function(require,module,exports){
+arguments[4][9][0].apply(exports,arguments)
+},{"./common.js":24,"dup":9}],31:[function(require,module,exports){
+arguments[4][10][0].apply(exports,arguments)
+},{"./common.js":24,"dup":10}],32:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"./common.js":24,"dup":11}],33:[function(require,module,exports){
 (function (global){
 /*
 ** Copyright (c) 2012 The Khronos Group Inc.
@@ -8615,7 +8697,7 @@ return {
 module.exports = WebGLDebugUtils;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],23:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 'use strict';
 
 var util = require('../util');
@@ -8836,10 +8918,28 @@ ObjectBase.prototype.y = function(val) {
 ObjectBase.prototype.setVelocity = function(velocity) {
 	this.velocity = velocity;
 };
+
+var EXTRA_OUT_OF_SIZE = 100;
+ObjectBase.prototype.isOutOfStage = function( ) {
+	if(this.x() + EXTRA_OUT_OF_SIZE < 0 ||
+	   this.y() + EXTRA_OUT_OF_SIZE < 0 ||
+	   this.x() > this.core.width  + EXTRA_OUT_OF_SIZE ||
+	   this.y() > this.core.height + EXTRA_OUT_OF_SIZE
+	  ) {
+		return true;
+	}
+
+	return false;
+};
+
+
+
+
+
 module.exports = ObjectBase;
 
 
-},{"../util":31}],24:[function(require,module,exports){
+},{"../util":47}],35:[function(require,module,exports){
 'use strict';
 
 // TODO: add pooling logic
@@ -8924,9 +9024,261 @@ PoolManager.prototype.checkCollisionWithManager = function(manager) {
 	}
 };
 
+PoolManager.prototype.removeOutOfStageObjects = function() {
+	for(var id in this.objects) {
+		if(this.objects[id].isOutOfStage()) {
+			this.remove(id);
+		}
+	}
+};
+
+
+
+
 module.exports = PoolManager;
 
-},{"../util":31,"./base":23}],25:[function(require,module,exports){
+},{"../util":47,"./base":34}],36:[function(require,module,exports){
+'use strict';
+
+// TODO: add pooling logic
+// TODO: split manager class and pool manager class
+var base_object = require('./base');
+var util = require('../util');
+var glmat = require('gl-matrix');
+
+var CONSTANT_3D = require('../constant_3d').SPRITE3D;
+
+var PoolManager3D = function(scene, Class) {
+	base_object.apply(this, arguments);
+
+	this.Class = Class;
+	this.objects = {};
+
+	this.vertices = [];
+	this.coordinates = [];
+	this.indices = [];
+	this.colors = [];
+
+	var gl = this.core.gl;
+	this.vBuffer = gl.createBuffer();
+	this.cBuffer = gl.createBuffer();
+	this.iBuffer = gl.createBuffer();
+	this.aBuffer = gl.createBuffer();
+
+	this.mvMatrix = glmat.mat4.create();
+	this.pMatrix = glmat.mat4.create();
+};
+util.inherit(PoolManager3D, base_object);
+
+PoolManager3D.prototype.init = function() {
+	base_object.prototype.init.apply(this, arguments);
+
+	this.objects = {};
+
+	this._initmvpMatrix();
+
+};
+PoolManager3D.prototype._initmvpMatrix = function() {
+	// The upper left corner is the canvas origin
+	// so reduce canvas width and add canvas height
+	glmat.mat4.identity(this.mvMatrix);
+	glmat.mat4.translate(this.mvMatrix, this.mvMatrix, [-this.core.width/2, this.core.height/2, 0]);
+
+	this._setOrthographicProjection();
+};
+PoolManager3D.prototype._setOrthographicProjection = function() {
+	glmat.mat4.identity(this.pMatrix);
+	var near = 0.1;
+	var far  = 10.0;
+	glmat.mat4.ortho(this.pMatrix,
+		-this.core.width/2,
+		this.core.width/2,
+		-this.core.height/2,
+		this.core.height/2,
+		near, far);
+};
+
+PoolManager3D.prototype.beforeDraw = function(){
+	base_object.prototype.beforeDraw.apply(this, arguments);
+
+	for(var id in this.objects) {
+		this.objects[id].beforeDraw();
+	}
+
+	// update: vertices, indices, texture coordinates, colors
+	this._updateAttributes();
+};
+
+// update: vertices, indices, texture coordinates, colors
+PoolManager3D.prototype._updateAttributes = function() {
+	this._resetAttributes();
+
+	var i = 0;
+	for(var id in this.objects) {
+		var object = this.objects[id];
+
+		if(!object.isShow()){
+			continue;
+		}
+
+		var j;
+		for(j = 0; j < CONSTANT_3D.V_SIZE; j++) {
+			this.vertices[i * CONSTANT_3D.V_SIZE + j] = object.vertices[j];
+		}
+
+		for(j = 0; j < CONSTANT_3D.C_SIZE; j++) {
+			this.coordinates[i * CONSTANT_3D.C_SIZE + j] = object.coordinates[j];
+		}
+
+		for(j = 0; j < CONSTANT_3D.I_SIZE; j++) {
+			this.indices[i * CONSTANT_3D.I_SIZE + j] = i * CONSTANT_3D.V_ITEM_NUM + object.indices[j];
+		}
+
+		for(j = 0; j < CONSTANT_3D.A_SIZE; j++) {
+			this.colors[i * CONSTANT_3D.A_SIZE + j] = object.colors[j];
+		}
+
+		i++;
+	}
+};
+
+PoolManager3D.prototype._resetAttributes = function() {
+	this.vertices.length    = 0;
+	this.coordinates.length = 0;
+	this.indices.length     = 0;
+	this.colors.length      = 0;
+};
+
+
+
+
+PoolManager3D.prototype.draw = function(){
+	base_object.prototype.draw.apply(this, arguments);
+
+	// There is no objects.
+	if (this.vertices.length === 0) return;
+
+	var gl = this.core.gl;
+	var shader = this.shader();
+
+	gl.useProgram(shader.shader_program);
+	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+	gl.enable(gl.BLEND);
+	gl.disable(gl.DEPTH_TEST);
+
+	this._setupAttribute("aVertexPosition", this.vBuffer, new Float32Array(this.vertices), CONSTANT_3D.V_ITEM_SIZE);
+	this._setupAttribute("aTextureCoordinates", this.cBuffer, new Float32Array(this.coordinates), CONSTANT_3D.C_ITEM_SIZE);
+	this._setupAttribute("aColor", this.aBuffer, new Float32Array(this.colors), CONSTANT_3D.A_ITEM_SIZE);
+
+	// TODO: use some types of texture
+	for(var id in this.objects) {
+		var texture = this.objects[id].texture;
+		this._setupTexture("uSampler", 0, texture);
+		break;
+	}
+
+	gl.uniformMatrix4fv(shader.uniform_locations.uPMatrix,  false, this.pMatrix);
+	gl.uniformMatrix4fv(shader.uniform_locations.uMVMatrix, false, this.mvMatrix);
+
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.iBuffer);
+	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
+
+	// TODO: how to implement?
+	//this.setupAdditionalVariables();
+
+	gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
+
+	/*
+	 * TODO:
+	 * reflect
+	 * scaling
+	*/
+};
+
+PoolManager3D.prototype._setupAttribute = function(attr_name, buffer, data, size){
+	var gl = this.core.gl;
+	var shader = this.shader();
+	gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+	gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+	gl.enableVertexAttribArray(shader.attribute_locations[attr_name]);
+	gl.vertexAttribPointer(shader.attribute_locations[attr_name], size, gl.FLOAT, false, 0, 0);
+};
+PoolManager3D.prototype._setupTexture = function(uniform_name, unit_no, texture){
+	var gl = this.core.gl;
+	var shader = this.shader();
+	gl.activeTexture(gl["TEXTURE" + unit_no]);
+	gl.bindTexture(gl.TEXTURE_2D, texture);
+	gl.uniform1i(shader.uniform_locations[uniform_name], unit_no);
+};
+
+
+
+PoolManager3D.prototype.afterDraw = function(){
+	base_object.prototype.afterDraw.apply(this, arguments);
+	for(var id in this.objects) {
+		this.objects[id].afterDraw();
+	}
+};
+
+PoolManager3D.prototype.create = function() {
+	var object = new this.Class(this.scene);
+	object.init.apply(object, arguments);
+
+	this.objects[object.id] = object;
+
+	return object;
+};
+PoolManager3D.prototype.remove = function(id) {
+	delete this.objects[id];
+};
+
+PoolManager3D.prototype.checkCollisionWithObject = function(obj1) {
+	for(var id in this.objects) {
+		var obj2 = this.objects[id];
+		if(obj1.checkCollision(obj2)) {
+			obj1.onCollision(obj2);
+			obj2.onCollision(obj1);
+		}
+	}
+};
+
+PoolManager3D.prototype.checkCollisionWithManager = function(manager) {
+	for(var obj1_id in this.objects) {
+		for(var obj2_id in manager.objects) {
+			if(this.objects[obj1_id].checkCollision(manager.objects[obj2_id])) {
+				var obj1 = this.objects[obj1_id];
+				var obj2 = manager.objects[obj2_id];
+
+				obj1.onCollision(obj2);
+				obj2.onCollision(obj1);
+
+				// do not check died object twice
+				if (!this.objects[obj1_id]) {
+					break;
+				}
+			}
+		}
+	}
+};
+
+PoolManager3D.prototype.removeOutOfStageObjects = function() {
+	for(var id in this.objects) {
+		if(this.objects[id].isOutOfStage()) {
+			this.remove(id);
+		}
+	}
+};
+
+PoolManager3D.prototype.shader = function(){
+	return this.core.sprite_3d_shader;
+};
+
+
+
+
+module.exports = PoolManager3D;
+
+},{"../constant_3d":20,"../util":47,"./base":34,"gl-matrix":23}],37:[function(require,module,exports){
 'use strict';
 var base_object = require('./base');
 var util = require('../util');
@@ -9064,7 +9416,352 @@ Sprite.prototype.isReflect = function(){
 
 module.exports = Sprite;
 
-},{"../util":31,"./base":23}],26:[function(require,module,exports){
+},{"../util":47,"./base":34}],38:[function(require,module,exports){
+'use strict';
+var base_object = require('./base');
+var util = require('../util');
+var CONSTANT_3D = require('../constant_3d').SPRITE3D;
+var glmat = require('gl-matrix');
+
+var Sprite3d = function(scene) {
+	base_object.apply(this, arguments);
+
+	this.current_sprite_index = 0;
+
+	this._z = 0;
+
+	this.vertices = [];
+	this.coordinates = [];
+	this.indices = [];
+	this.colors = [];
+
+	this.vertices.length    = CONSTANT_3D.V_SIZE;
+	this.coordinates.length = CONSTANT_3D.C_SIZE;
+	this.indices.length     = CONSTANT_3D.I_SIZE;
+	this.colors.length      = CONSTANT_3D.A_SIZE;
+
+	var gl = this.core.gl;
+	this.vBuffer = gl.createBuffer();
+	this.cBuffer = gl.createBuffer();
+	this.iBuffer = gl.createBuffer();
+	this.aBuffer = gl.createBuffer();
+
+	this.texture = null;
+
+	this.mvMatrix = glmat.mat4.create();
+	this.pMatrix = glmat.mat4.create();
+};
+util.inherit(Sprite3d, base_object);
+
+Sprite3d.prototype.init = function(){
+	base_object.prototype.init.apply(this, arguments);
+
+	this.current_sprite_index = 0;
+
+	this._initmvpMatrix();
+	this._initVertices();
+	this._initCoordinates();
+	this._initIndices();
+	this._initColors();
+
+	this._initTexture();
+
+};
+
+Sprite3d.prototype._initmvpMatrix = function() {
+	// The upper left corner is the canvas origin
+	// so reduce canvas width and add canvas height
+	glmat.mat4.identity(this.mvMatrix);
+	glmat.mat4.translate(this.mvMatrix, this.mvMatrix, [-this.core.width/2, this.core.height/2, 0]);
+
+	this._setOrthographicProjection();
+};
+Sprite3d.prototype._initVertices = function() {
+	var w = this.spriteWidth()/2;
+	var h = this.spriteHeight()/2;
+
+	this.vertices[0]  = -w;
+	this.vertices[1]  = -h;
+	this.vertices[2]  = -1.0;
+
+	this.vertices[3]  =  w;
+	this.vertices[4]  = -h;
+	this.vertices[5]  = -1.0;
+
+	this.vertices[6]  =  w;
+	this.vertices[7]  =  h;
+	this.vertices[8]  = -1.0;
+
+	this.vertices[9]  = -w;
+	this.vertices[10] =  h;
+	this.vertices[11] = -1.0;
+};
+
+Sprite3d.prototype._initCoordinates = function() {
+
+	var image = this.core.image_loader.getImage(this.spriteName());
+
+	var w = this.spriteWidth() / image.width;
+	var h = this.spriteHeight() / image.height;
+
+	var x1 = w * this.spriteIndexX();
+	var y1 = h * this.spriteIndexY();
+	var x2 = x1 + w;
+	var y2 = y1 + h;
+
+	this.coordinates[0] = x1;
+	this.coordinates[1] = y2;
+
+	this.coordinates[2] = x2;
+	this.coordinates[3] = y2;
+
+	this.coordinates[4] = x2;
+	this.coordinates[5] = y1;
+
+	this.coordinates[6] = x1;
+	this.coordinates[7] = y1;
+};
+
+Sprite3d.prototype._initIndices = function() {
+	this.indices[0] = 0;
+	this.indices[1] = 1;
+	this.indices[2] = 2;
+
+	this.indices[3] = 0;
+	this.indices[4] = 2;
+	this.indices[5] = 3;
+};
+
+Sprite3d.prototype._initColors = function() {
+	this.colors[0] = 1.0;
+	this.colors[1] = 1.0;
+	this.colors[2] = 1.0;
+	this.colors[3] = 1.0;
+
+	this.colors[4] = 1.0;
+	this.colors[5] = 1.0;
+	this.colors[6] = 1.0;
+	this.colors[7] = 1.0;
+
+	this.colors[8] = 1.0;
+	this.colors[9] = 1.0;
+	this.colors[10] = 1.0;
+	this.colors[11] = 1.0;
+
+	this.colors[12] = 1.0;
+	this.colors[13] = 1.0;
+	this.colors[14] = 1.0;
+	this.colors[15] = 1.0;
+};
+
+Sprite3d.prototype._initTexture = function() {
+	var gl = this.core.gl;
+	var image = this.core.image_loader.getImage(this.spriteName());
+
+	var texture = gl.createTexture();
+
+	gl.bindTexture(gl.TEXTURE_2D, texture);
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+	gl.bindTexture(gl.TEXTURE_2D, null);
+
+	this.texture = texture;
+};
+Sprite3d.prototype._setOrthographicProjection = function() {
+	glmat.mat4.identity(this.pMatrix);
+	var near = 0.1;
+	var far  = 10.0;
+	glmat.mat4.ortho(this.pMatrix,
+		-this.core.width/2,
+		this.core.width/2,
+		-this.core.height/2,
+		this.core.height/2,
+		near, far);
+};
+
+
+
+
+Sprite3d.prototype.beforeDraw = function(){
+	base_object.prototype.beforeDraw.apply(this, arguments);
+	// animation sprite
+	if(this.frame_count % this.spriteAnimationSpan() === 0) {
+		this.current_sprite_index++;
+		if(this.current_sprite_index >= this.spriteIndices().length) {
+			this.current_sprite_index = 0;
+		}
+	}
+
+	// update vertices property
+	this._initVertices();
+	this._initCoordinates();
+	this._translate();
+	// TODO: rotate
+	//this._rotate();
+};
+
+
+Sprite3d.prototype._translate = function() {
+	for(var i = 0; i < CONSTANT_3D.V_ITEM_NUM; i++) {
+		this.vertices[i * CONSTANT_3D.V_ITEM_SIZE + 0] += this.x();
+		this.vertices[i * CONSTANT_3D.V_ITEM_SIZE + 1] -= this.y();
+		this.vertices[i * CONSTANT_3D.V_ITEM_SIZE + 2] += this.z();
+	}
+};
+
+Sprite3d.prototype._rotate = function() {
+	var radian = this._getRadian();
+	for(var i = 0; i < CONSTANT_3D.V_ITEM_NUM; i++) {
+		var x = this.vertices[i * CONSTANT_3D.V_ITEM_SIZE + 0];
+		var y = this.vertices[i * CONSTANT_3D.V_ITEM_SIZE + 1];
+
+		this.vertices[i * CONSTANT_3D.V_ITEM_SIZE + 0] = x * Math.cos(radian) - y * Math.sin(radian);
+		this.vertices[i * CONSTANT_3D.V_ITEM_SIZE + 1] = x * Math.sin(radian) + y * Math.cos(radian);
+	}
+};
+
+Sprite3d.prototype._getRadian = function() {
+	var theta = this.velocity.theta;
+	return util.thetaToRadian(theta);
+};
+
+Sprite3d.prototype.draw = function(){
+	if(this.isShow()) {
+		var gl = this.core.gl;
+
+		var shader = this.shader();
+
+		gl.useProgram(shader.shader_program);
+
+		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+		gl.enable(gl.BLEND);
+		gl.disable(gl.DEPTH_TEST);
+
+		this._setupAttribute("aVertexPosition", this.vBuffer, new Float32Array(this.vertices), CONSTANT_3D.V_ITEM_SIZE);
+		this._setupAttribute("aTextureCoordinates", this.cBuffer, new Float32Array(this.coordinates), CONSTANT_3D.C_ITEM_SIZE);
+		this._setupAttribute("aColor", this.aBuffer, new Float32Array(this.colors), CONSTANT_3D.A_ITEM_SIZE);
+
+		this._setupTexture("uSampler", 0, this.texture);
+
+		gl.uniformMatrix4fv(shader.uniform_locations.uPMatrix,  false, this.pMatrix);
+		gl.uniformMatrix4fv(shader.uniform_locations.uMVMatrix, false, this.mvMatrix);
+
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.iBuffer);
+		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
+
+		// inherit class may implement this.
+		this.setupAdditionalVariables();
+
+		gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
+
+		/*
+		 * TODO:
+		 * reflect
+		 * scaling
+		*/
+	}
+
+	// draw sub objects(even if this object is not show)
+	base_object.prototype.draw.apply(this, arguments);
+};
+
+Sprite3d.prototype._setupAttribute = function(attr_name, buffer, data, size){
+	var gl = this.core.gl;
+	var shader = this.shader();
+	gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+	gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+	gl.enableVertexAttribArray(shader.attribute_locations[attr_name]);
+	gl.vertexAttribPointer(shader.attribute_locations[attr_name], size, gl.FLOAT, false, 0, 0);
+};
+Sprite3d.prototype._setupTexture = function(uniform_name, unit_no, texture){
+	var gl = this.core.gl;
+	var shader = this.shader();
+	gl.activeTexture(gl["TEXTURE" + unit_no]);
+	gl.bindTexture(gl.TEXTURE_2D, texture);
+	gl.uniform1i(shader.uniform_locations[uniform_name], unit_no);
+};
+
+
+
+
+Sprite3d.prototype.z = function(val) {
+	if (typeof val !== 'undefined') { this._z = val; }
+	return this._z;
+};
+
+Sprite3d.prototype.shader = function(){
+	return this.core.sprite_3d_shader;
+};
+
+// setup additional variables for shader(attributes, uniforms)
+Sprite3d.prototype.setupAdditionalVariables = function(){
+
+
+};
+
+
+
+
+
+
+Sprite3d.prototype.spriteName = function(){
+	throw new Error("spriteName method must be overridden.");
+};
+Sprite3d.prototype.spriteIndexX = function(){
+	return this.spriteIndices()[this.current_sprite_index].x;
+};
+Sprite3d.prototype.spriteIndexY = function(){
+	return this.spriteIndices()[this.current_sprite_index].y;
+};
+Sprite3d.prototype.width = function(){
+	return this.spriteWidth() * this.scaleWidth();
+};
+Sprite3d.prototype.height = function(){
+	return this.spriteHeight() * this.scaleHeight();
+};
+
+
+
+
+Sprite3d.prototype.isShow = function(){
+	return true;
+};
+
+
+Sprite3d.prototype.spriteAnimationSpan = function(){
+	return 0;
+};
+Sprite3d.prototype.spriteIndices = function(){
+	return [{x: 0, y: 0}];
+};
+Sprite3d.prototype.spriteWidth = function(){
+	return 0;
+};
+Sprite3d.prototype.spriteHeight = function(){
+	return 0;
+};
+Sprite3d.prototype.rotateAdjust = function(){
+	return 0;
+};
+
+Sprite3d.prototype.scaleWidth = function(){
+	return 1;
+};
+Sprite3d.prototype.scaleHeight = function(){
+	return 1;
+};
+Sprite3d.prototype.isReflect = function(){
+	return false;
+};
+
+
+
+module.exports = Sprite3d;
+
+},{"../constant_3d":20,"../util":47,"./base":34,"gl-matrix":23}],39:[function(require,module,exports){
 'use strict';
 
 var SceneBase = function(core, scene) {
@@ -9171,7 +9868,7 @@ SceneBase.prototype.y = function(val) {
 module.exports = SceneBase;
 
 
-},{}],27:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 'use strict';
 
 // loading scene
@@ -9240,7 +9937,7 @@ SceneLoading.prototype.notifyAllLoaded = function(){
 
 module.exports = SceneLoading;
 
-},{"../util":31,"./base":26}],28:[function(require,module,exports){
+},{"../util":47,"./base":39}],41:[function(require,module,exports){
 'use strict';
 
 var SerifManager = function () {
@@ -9394,7 +10091,84 @@ SerifManager.prototype.lines = function () {
 
 module.exports = SerifManager;
 
-},{}],29:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
+module.exports = "precision mediump float;\nuniform sampler2D uSampler;\nvarying vec2 vTextureCoordinates;\nvarying vec4 vColor;\n\nvoid main() {\n\tvec4 textureColor = texture2D(uSampler, vTextureCoordinates);\n\tgl_FragColor = textureColor * vColor;\n}\n\n";
+
+},{}],43:[function(require,module,exports){
+module.exports = "attribute vec3 aVertexPosition;\nattribute vec2 aTextureCoordinates;\nattribute vec4 aColor;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nvarying vec2 vTextureCoordinates;\nvarying vec4 vColor;\n\nvoid main() {\n\tgl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\n\tvTextureCoordinates = aTextureCoordinates;\n\tvColor = aColor;\n}\n\n";
+
+},{}],44:[function(require,module,exports){
+'use strict';
+var glmat = require("gl-matrix");
+
+var ShaderProgram = function(
+	gl,
+	vs_text,
+	fs_text,
+	attribute_variables,
+	uniform_variables
+) {
+	if (!gl) throw new Error("arguments 1 must be WebGLRenderingContext instance");
+
+	this.gl = gl;
+
+	var vs_shader = this.createShader(gl, gl.VERTEX_SHADER, vs_text);
+	var fs_shader = this.createShader(gl, gl.FRAGMENT_SHADER, fs_text);
+	var shader_program = this.createShaderProgram(gl, vs_shader, fs_shader);
+
+	var i;
+	var attribute_locations = {};
+	for (i=0; i < attribute_variables.length; i++) {
+		attribute_locations[ attribute_variables[i] ] = gl.getAttribLocation(shader_program, attribute_variables[i]);
+	}
+
+	var uniform_locations = {};
+	for (i=0; i < uniform_variables.length; i++) {
+		uniform_locations[ uniform_variables[i] ] = gl.getUniformLocation(shader_program, uniform_variables[i]);
+	}
+
+	this.shader_program = shader_program;
+	this.attribute_locations = attribute_locations;
+	this.uniform_locations = uniform_locations;
+};
+
+ShaderProgram.prototype.createShader = function (gl, type, source_text) {
+	if(type !== gl.VERTEX_SHADER && type !== gl.FRAGMENT_SHADER) {
+		throw new Error ("type must be vertex or fragment");
+	}
+
+	var shader = gl.createShader(type);
+
+	gl.shaderSource(shader, source_text);
+
+	gl.compileShader(shader);
+
+	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+		throw (
+			(type === gl.VERTEX_SHADER ? "Vertex" : "Fragment") + " failed to compile:\n\n" + gl.getShaderInfoLog(shader));
+	}
+
+	return shader;
+};
+
+ShaderProgram.prototype.createShaderProgram = function(gl, vertex_shader, fragment_shader) {
+	var shaderProgram = gl.createProgram();
+
+	gl.attachShader(shaderProgram, vertex_shader);
+	gl.attachShader(shaderProgram, fragment_shader);
+
+	gl.linkProgram(shaderProgram);
+
+	if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+		throw new Error("Could not initialize shaders:\n\n" + gl.getProgramInfoLog(shaderProgram));
+	}
+
+	return shaderProgram;
+};
+
+module.exports = ShaderProgram;
+
+},{"gl-matrix":23}],45:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -9558,7 +10332,7 @@ StorageBase.prototype._removeWebStorage = function() {
 module.exports = StorageBase;
 
 }).call(this,require('_process'))
-},{"_process":13,"fs":1,"path":12}],30:[function(require,module,exports){
+},{"_process":13,"fs":1,"path":12}],46:[function(require,module,exports){
 'use strict';
 var base_class = require('./base');
 var util = require('../util');
@@ -9580,7 +10354,7 @@ StorageSave.KEY = function(){
 
 module.exports = StorageSave;
 
-},{"../util":31,"./base":29}],31:[function(require,module,exports){
+},{"../util":47,"./base":45}],47:[function(require,module,exports){
 'use strict';
 var Util = {
 	inherit: function( child, parent ) {
@@ -9627,7 +10401,7 @@ var Util = {
 
 module.exports = Util;
 
-},{}],32:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 'use strict';
 var Game = require('./game');
 
@@ -9646,16 +10420,267 @@ window.onload = function() {
 };
 
 
-},{"./game":14}],33:[function(require,module,exports){
+},{"./game":14}],49:[function(require,module,exports){
+'use strict';
+var base_object = require('../hakurei').object.sprite3d;
+var util = require('../hakurei').util;
+var glmat = require('gl-matrix');
+var ShaderProgram = require('../hakurei').shader_program;
+var VS = require("../shader/main.vs");
+var FS = require("../shader/main.fs");
+
+
+var Background = function (scene) {
+	base_object.apply(this, arguments);
+
+	this.shader_program = new ShaderProgram(
+		this.core.gl,
+		VS, FS,
+		[
+			"aTextureCoordinates",
+			"aVertexPosition",
+			"aColor"
+		],
+		[
+			"uMVMatrix",
+			"uPMatrix",
+			"uSampler", // texture data
+			"uFighterX",
+			"uFighterY",
+			"uTime",
+			"uLight",
+		]
+	);
+};
+util.inherit(Background, base_object);
+
+Background.prototype.init = function(x, y) {
+	base_object.prototype.init.apply(this, arguments);
+	this.x(x);
+	this.y(y);
+
+	this._setPerspectiveProjection();
+};
+
+Background.prototype.spriteName = function(){
+	return "bg";
+};
+Background.prototype.spriteIndices = function(){
+	return [
+		{x: 0, y: 0},
+	];
+};
+Background.prototype.spriteWidth = function(){
+	return 512;
+};
+Background.prototype.spriteHeight = function(){
+	return 512;
+};
+
+Background.prototype._initVertices = function() {
+  this.vertices[0] = 0.0;
+  this.vertices[1] = 0.0;
+  this.vertices[2] = 0.0;
+
+  this.vertices[3] = 1.0;
+  this.vertices[4] = 0.0;
+  this.vertices[5] = 0.0;
+
+  this.vertices[6] = 1.0;
+  this.vertices[7] = 4.0;
+  this.vertices[8] = 0.0;
+
+  this.vertices[9] = 0.0;
+  this.vertices[10] = 4.0;
+  this.vertices[11] = 0.0;
+};
+
+Background.prototype._initCoordinates = function() {
+  this.coordinates[0] = 0.0;
+  this.coordinates[1] = 4.0;
+
+  this.coordinates[2] = 1.0;
+  this.coordinates[3] = 4.0;
+
+  this.coordinates[4] = 1.0;
+  this.coordinates[5] = 0.0;
+
+  this.coordinates[6] = 0.0;
+  this.coordinates[7] = 0.0;
+};
+
+Background.prototype.beforeDraw = function(x, y) {
+	base_object.prototype.beforeDraw.apply(this, arguments);
+
+	glmat.mat4.identity(this.mvMatrix);
+	glmat.mat4.rotate(this.mvMatrix, this.mvMatrix, Math.PI/180*52, [-1, 0, 0]);
+	glmat.mat4.translate(this.mvMatrix, this.mvMatrix, [-0.5, 0-(((this.frame_count/2) | 0)%100)/100, -0.4]);
+};
+
+Background.prototype._setPerspectiveProjection = function() {
+	glmat.mat4.identity(this.pMatrix);
+	var near = 0.1;
+	var far  = 10.0;
+	glmat.mat4.perspective(this.pMatrix, 120, this.core.width / this.core.height, near, far);
+};
+
+Background.prototype.shader = function(){
+	return this.shader_program;
+};
+
+Background.prototype.setupAdditionalVariables = function(){
+	var gl = this.core.gl;
+	var shader = this.shader();
+
+	gl.uniform1i(shader.uniform_locations.uTime, this.frame_count);
+	gl.uniform1f(shader.uniform_locations.uFighterX, this.scene.player.x());
+	gl.uniform1f(shader.uniform_locations.uFighterY, this.core.height - this.scene.player.y());
+	gl.uniform1i(shader.uniform_locations.uLight, true);
+};
+
+
+
+
+
+
+
+module.exports = Background;
+
+},{"../hakurei":15,"../shader/main.fs":53,"../shader/main.vs":54,"gl-matrix":2}],50:[function(require,module,exports){
+'use strict';
+var base_object = require('../hakurei').object.sprite3d;
+var util = require('../hakurei').util;
+
+var Player = function (scene) {
+	base_object.apply(this, arguments);
+};
+util.inherit(Player, base_object);
+
+Player.prototype.init = function(x, y) {
+	base_object.prototype.init.apply(this, arguments);
+	this.x(x);
+	this.y(y);
+
+	this.indexY = 0;
+};
+
+Player.prototype.spriteName = function(){
+	return "player";
+};
+Player.prototype.spriteIndices = function(){
+	return [
+		/*
+		{x: 0, y: this.indexY},
+		{x: 1, y: this.indexY},
+		{x: 2, y: this.indexY},
+		{x: 3, y: this.indexY},
+		*/
+		{x: 4, y: this.indexY},
+		{x: 5, y: this.indexY},
+		{x: 6, y: this.indexY},
+		{x: 7, y: this.indexY}
+	];
+};
+Player.prototype.spriteAnimationSpan = function(){
+	return 4;
+};
+Player.prototype.spriteWidth = function(){
+	return 32;
+};
+Player.prototype.spriteHeight = function(){
+	return 48;
+};
+
+Player.prototype.forbidOutOfStage = function(){
+	if(this.x() < 0) {
+		this.x(0);
+	}
+	if(this.x() > this.core.width) {
+		this.x(this.core.width);
+	}
+	if(this.y() < 0) {
+		this.y(0);
+	}
+	if(this.y() > this.core.height) {
+		this.y(this.core.height);
+	}
+};
+
+// 移動アニメーション
+Player.prototype.animateLeft = function(){
+	this.indexY = 1;
+};
+Player.prototype.animateRight = function(){
+	this.indexY = 2;
+};
+Player.prototype.animateNeutral = function(){
+	this.indexY = 0;
+};
+
+Player.prototype.shot = function(){
+	var SHOT_SPAN = 5;
+	if(this.frame_count % SHOT_SPAN === 0) {
+		this.scene.pool_manager.create(this.x(), this.y());
+	}
+};
+
+
+
+
+
+
+
+
+
+
+module.exports = Player;
+
+},{"../hakurei":15}],51:[function(require,module,exports){
+'use strict';
+var base_object = require('../hakurei').object.sprite3d;
+var util = require('../hakurei').util;
+
+var Shot = function (scene) {
+	base_object.apply(this, arguments);
+};
+util.inherit(Shot, base_object);
+
+Shot.prototype.init = function(x, y) {
+	base_object.prototype.init.apply(this, arguments);
+	this.x(x);
+	this.y(y);
+	this.setVelocity({magnitude:5, theta:270});
+};
+
+Shot.prototype.spriteName = function(){
+	return "bullet";
+};
+Shot.prototype.spriteIndices = function(){
+	return [
+		{x: 8, y: 1},
+	];
+};
+Shot.prototype.spriteWidth = function(){
+	return 16;
+};
+Shot.prototype.spriteHeight = function(){
+	return 16;
+};
+
+module.exports = Shot;
+
+},{"../hakurei":15}],52:[function(require,module,exports){
 'use strict';
 
 var base_scene = require('../hakurei').scene.base;
 var util = require('../hakurei').util;
+var PoolManager = require('../hakurei').object.pool_manager3d;
 var CONSTANT = require('../hakurei').constant;
-var ShaderProgram = require('../shader_program');
-var VS = require('../shader/main.vs');
-var FS = require('../shader/main.fs');
 var glmat = require("gl-matrix");
+var Player = require('../object/player');
+var Shot = require('../object/shot');
+//var Fps = require('../object/fps');
+var Background = require('../object/bg');
 
 var SceneTitle = function(core) {
 	base_scene.apply(this, arguments);
@@ -9665,277 +10690,76 @@ util.inherit(SceneTitle, base_scene);
 SceneTitle.prototype.init = function(){
 	base_scene.prototype.init.apply(this, arguments);
 
-	this.shader_program = new ShaderProgram(
-		this.core.gl,
-		// 頂点シェーダ／フラグメントシェーダ
-		VS, FS,
-		// attribute 変数一覧(頂点毎に異なるデータ)
-		[
-			"aVertexPosition",
-			"aTextureCoordinates",
-			"aColor",
-		],
-		// uniform 変数一覧(頂点毎に同じデータ)
-		[
-			"uMVMatrix",
-			"uPMatrix",
-			"uSampler",
-		]
-	);
+	var background = new Background(this);
+	background.init(0, 0);
+	this.addObject(background);
+
+	this.player = new Player(this);
+	this.player.init(this.core.width/2, this.core.height/2);
+	this.addObject(this.player);
+
+	this.pool_manager = new PoolManager(this, Shot);
+	this.pool_manager.init();
+	this.addObject(this.pool_manager);
 
 	/*
-	//this.triangle = new Triangle(this.core.gl);
-	this.fps = new FPS(this.core.gl);
-	this.myon = new Myon(this.core.gl, this.core.image_loader.getImage("myon"));
-	*/
-
-	/*
-	var light_color       = [1.0, 0.5, 0.0];
-	var light_position    = [0,0,1];
-	var light_attenuation = [0.3, 0.1, 0.05];
-	this.light = new PointLight(light_color, light_position, light_attenuation);
-	*/
-	//this.camera = new Camera();
-
-	/*
-	// perspective matrix
-	var pMatrix = glmat.mat4.create();
-	glmat.mat4.identity(pMatrix);
-	glmat.mat4.perspective(pMatrix, 45.0, this.core.width/this.core.height, 0.1, 100.0);
-	this.pMatrix = pMatrix;
-
-	this.mvpMatrix = glmat.mat4.create();
+	var fps = new Fps(this);
+	fps.init(10, 10, "FPS: 60");
+	this.addObject(fps);
 	*/
 };
 
 SceneTitle.prototype.beforeDraw = function(){
 	base_scene.prototype.beforeDraw.apply(this, arguments);
 
-	/*
-	// カメラ更新
-	this.camera.moveCenter([0.0, 0.0, 0.0]);
-	this.camera.updateMatrix();
-
-	// view matrix
-	var vMatrix = this.camera.vMatrix;
-	var vpMatrix = glmat.mat4.create();
-	glmat.mat4.identity(vpMatrix);
-
-	glmat.mat4.multiply(vpMatrix, this.pMatrix, vMatrix);
-
-	// model matrix
-	glmat.mat4.identity(this.mvpMatrix);
-
-	//var rad = (this.frame_count % 360) * Math.PI / 180;
-	var mMatrix = glmat.mat4.create();
-	glmat.mat4.identity(mMatrix);
-	//glmat.mat4.rotate(mMatrix, mMatrix, rad, [0, 1, 0]);
-
-	glmat.mat4.multiply(this.mvpMatrix, vpMatrix, mMatrix);
-
-	// 三角形更新
-	this.myon.update();
-	this.fps.update();
-	*/
-};
-
-
-SceneTitle.prototype.draw = function(){
-	var gl = this.core.gl;
-	/*
-	// Canvasの大きさとビューポートの大きさを合わせる
-	this.core.gl.viewport(0, 0, this.core.width, this.core.height);
-
-	this.core.gl.enable(this.core.gl.BLEND);
-	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-	gl.enable(gl.DEPTH_TEST);
-	gl.depthFunc(gl.LEQUAL);
-
-
-	this.renderMyon();
-	this.renderFPS();
-
-	// WebGL_API 29. 描画
-	this.core.gl.flush();
-	*/
-};
-
-
-SceneTitle.prototype.renderMyon = function(){
-	// WebGL_API 21. uniform 変数にデータを登録する
-	// 4fv -> vec4, 3fv -> vec3, 1f -> float
-	this.core.gl.uniformMatrix4fv(this.shader_program.uniform_locations.mvpMatrix, false, this.mvpMatrix);
-
-	// attribute 変数にデータを登録する
-	this.attribSetup(this.shader_program.attribute_locations.position, this.myon.positionObject,  3);
-	this.attribSetup(this.shader_program.attribute_locations.color, this.myon.colorObject,  4);
-	this.attribSetup(this.shader_program.attribute_locations.textureCoord, this.myon.textureObject,  2);
-
-	// WebGL_API 25. 有効にするテクスチャユニットを指定(今回は0)
-	this.core.gl.activeTexture(this.core.gl.TEXTURE0);
-	// WebGL_API 26. テクスチャをバインドする
-	this.core.gl.bindTexture(this.core.gl.TEXTURE_2D, this.myon.texture);
-	// WebGL_API 27. テクスチャデータをシェーダに送る(ユニット 0)
-	this.core.gl.uniform1i(this.shader_program.uniform_locations.uSampler, 0);
-
-	// WebGL_API 28. 送信
-	this.core.gl.bindBuffer(this.core.gl.ELEMENT_ARRAY_BUFFER, this.myon.indexObject);
-	this.core.gl.drawElements(this.core.gl.TRIANGLES, this.myon.numVertices(), this.core.gl.UNSIGNED_SHORT, 0);
-};
-
-SceneTitle.prototype.renderFPS = function(){
-	// WebGL_API 21. uniform 変数にデータを登録する
-	// 4fv -> vec4, 3fv -> vec3, 1f -> float
-	this.core.gl.uniformMatrix4fv(this.shader_program.uniform_locations.mvpMatrix, false, this.mvpMatrix);
-
-	// attribute 変数にデータを登録する
-	this.attribSetup(this.shader_program.attribute_locations.position, this.fps.positionObject,  3);
-	this.attribSetup(this.shader_program.attribute_locations.color, this.fps.colorObject,  4);
-	this.attribSetup(this.shader_program.attribute_locations.textureCoord, this.fps.textureObject,  2);
-
-	// WebGL_API 25. 有効にするテクスチャユニットを指定(今回は0)
-	this.core.gl.activeTexture(this.core.gl.TEXTURE0);
-	// WebGL_API 26. テクスチャをバインドする
-	this.core.gl.bindTexture(this.core.gl.TEXTURE_2D, this.fps.texture);
-	// WebGL_API 27. テクスチャデータをシェーダに送る(ユニット 0)
-	this.core.gl.uniform1i(this.shader_program.uniform_locations.uSampler, 0);
-
-	// WebGL_API 28. 送信
-	this.core.gl.bindBuffer(this.core.gl.ELEMENT_ARRAY_BUFFER, this.fps.indexObject);
-	this.core.gl.drawElements(this.core.gl.TRIANGLES, this.fps.numVertices(), this.core.gl.UNSIGNED_SHORT, 0);
-};
-
-
-
-
-
-SceneTitle.prototype.attribSetup = function(attribute_location, buffer_object, size, type) {
-	if (!type) {
-		type = this.core.gl.FLOAT;
+	// Zが押下されていればショット生成
+	if(this.core.isKeyDown(CONSTANT.BUTTON_Z)) {
+		this.player.shot();
 	}
 
-	// WebGL_API 22. attribute 属性を有効にする
-	this.core.gl.enableVertexAttribArray(attribute_location);
+	var MOVE_NUM = 4;
 
-	// WebGL_API 23. 頂点バッファをバインドする
-	this.core.gl.bindBuffer(this.core.gl.ARRAY_BUFFER, buffer_object);
-	// WebGL_API 24. attribute 属性を登録する(1頂点の要素数、型を登録)
-	this.core.gl.vertexAttribPointer(attribute_location, size, type, false, 0, 0);
+	// 自機移動
+	if(this.core.isKeyDown(CONSTANT.BUTTON_LEFT)) {
+		this.player.x(this.player.x() - MOVE_NUM);
+	}
+	if(this.core.isKeyDown(CONSTANT.BUTTON_RIGHT)) {
+		this.player.x(this.player.x() + MOVE_NUM);
+	}
+	if(this.core.isKeyDown(CONSTANT.BUTTON_DOWN)) {
+		this.player.y(this.player.y() + MOVE_NUM);
+	}
+	if(this.core.isKeyDown(CONSTANT.BUTTON_UP)) {
+		this.player.y(this.player.y() - MOVE_NUM);
+	}
 
+	// 画面外に出させない
+	this.player.forbidOutOfStage();
+
+	// 画面外に出たオブジェクトの削除
+	this.pool_manager.removeOutOfStageObjects();
+
+	// 左右の移動に合わせて自機のアニメーションを変更
+	if(this.core.isKeyDown(CONSTANT.BUTTON_LEFT) && !this.core.isKeyDown(CONSTANT.BUTTON_RIGHT)) {
+		// 左移動中
+		this.player.animateLeft();
+	}
+	else if(this.core.isKeyDown(CONSTANT.BUTTON_RIGHT) && !this.core.isKeyDown(CONSTANT.BUTTON_LEFT)) {
+		// 右移動中
+		this.player.animateRight();
+	}
+	else {
+		// 左右には未移動
+		this.player.animateNeutral();
+	}
 };
+
 module.exports = SceneTitle;
 
 
-},{"../hakurei":15,"../shader/main.fs":34,"../shader/main.vs":35,"../shader_program":36,"gl-matrix":2}],34:[function(require,module,exports){
-module.exports = "precision mediump float;\nuniform sampler2D uSampler;\nvarying vec2 vTextureCoordinates;\nvarying vec4 vColor;\n\nvoid main() {\n\tvec4 textureColor = texture2D(uSampler, vTextureCoordinates);\n\tgl_FragColor = textureColor * vColor;\n}\n\n";
+},{"../hakurei":15,"../object/bg":49,"../object/player":50,"../object/shot":51,"gl-matrix":2}],53:[function(require,module,exports){
+module.exports = "precision mediump float;\nuniform sampler2D uSampler;\n\nuniform float uFighterX;\nuniform float uFighterY;\nuniform int uTime;\nuniform bool uLight;\n\nvarying vec2 vTextureCoordinates;\nvarying vec4 vColor;\n\nconst int num = 8;\nconst int unitAngle = 360 / num;\n\nvec2 getPosition(int unitAngle, int uTime, int i) {\n\tfloat ax = abs(mod(float(uTime*2), 240.0) - 120.0);\n\tfloat ay = abs(mod(float(uTime*3), 240.0) - 120.0);\n\tfloat rad = radians(float(unitAngle * i + uTime*8));\n\tfloat x = uFighterX + ax * cos(rad);\n\tfloat y = uFighterY + ay * sin(rad);\n\treturn vec2(x, y);\n}\n\nvoid main() {\n\tvec4 textureColor = texture2D(uSampler, vTextureCoordinates);\n\tif(uLight) {\n\t\tfloat color = 0.0;\n\t\tfor(int i = 0; i < num; i++) {\n\t\t\tvec2 pos = getPosition(unitAngle, uTime, i);\n\t\t\tfloat dist = length(gl_FragCoord.xy - pos) * 1.5;\n\t\t\tcolor += 5.0 / dist;\n\t\t}\n\t\tgl_FragColor = textureColor * vColor * vec4(vec3(color), 1.0);\n\t}\n\telse {\n\t\tgl_FragColor = textureColor * vColor;\n\t}\n}\n\n";
 
-},{}],35:[function(require,module,exports){
-module.exports = "attribute vec3 aVertexPosition;\nattribute vec2 aTextureCoordinates;\nattribute vec4 aColor;\n\nuniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nvarying vec2 vTextureCoordinates;\nvarying vec4 vColor;\n\nvoid main() {\n\tgl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\n\tvTextureCoordinates = aTextureCoordinates;\n\tvColor = aColor;\n}\n\n";
-
-},{}],36:[function(require,module,exports){
-'use strict';
-var glmat = require("gl-matrix");
-//var PointLight = require("./point_light");
-
-var ShaderProgram = function(
-	gl,
-	vs_text,
-	fs_text,
-	attribute_variables,
-	uniform_variables
-) {
-	if (!gl) throw new Error("arguments 1 must be WebGLRenderingContext instance");
-
-	this.gl = gl;
-
-	// 頂点シェーダ
-	var vs_shader = this.createShader(gl, gl.VERTEX_SHADER, vs_text);
-	// ピクセルシェーダ
-	var fs_shader = this.createShader(gl, gl.FRAGMENT_SHADER, fs_text);
-	// プログラム
-	var shader_program = this.createShaderProgram(gl, vs_shader, fs_shader);
-
-	var i;
-	// WebGL_API 09. 変数名が、シェーダ内での何番目の attribute 変数なのか取得
-	var attribute_locations = {};
-	for (i=0; i < attribute_variables.length; i++) {
-		attribute_locations[ attribute_variables[i] ] = gl.getAttribLocation(shader_program, attribute_variables[i]);
-	}
-
-	// WebGL_API 10. 変数名が、シェーダ内での何番目の uniform 変数なのか取得
-	var uniform_locations = {};
-	for (i=0; i < uniform_variables.length; i++) {
-		uniform_locations[ uniform_variables[i] ] = gl.getUniformLocation(shader_program, uniform_variables[i]);
-	}
-
-	/*
-	// 光源用の uniform array 変数取得
-	var uLight_locations = [];
-	for (i=0; i<4; i++) {
-		uLight_locations[i] = {};
-		for (var key in new PointLight()) { // TODO: not use Pointlight object
-			uLight_locations[i][key] = gl.getUniformLocation(shader_program, "uLight["+i+"]."+key);
-		}
-	}
-	uniform_locations.uLight = uLight_locations;
-	*/
-
-	this.shader_program = shader_program;
-	this.attribute_locations = attribute_locations;
-	this.uniform_locations = uniform_locations;
-};
-
-ShaderProgram.prototype.createShader = function (gl, type, source_text) {
-	if(type !== gl.VERTEX_SHADER && type !== gl.FRAGMENT_SHADER) {
-		throw new Error ("type must be vertex or fragment");
-	}
-
-	// WebGL_API 01. シェーダ作成
-	var shader = gl.createShader(type);
-
-	// WebGL_API 02. 生成されたシェーダにソースを割り当てる
-	gl.shaderSource(shader, source_text);
-
-	// WebGL_API 03. シェーダをコンパイルする
-	gl.compileShader(shader);
-
-	// WebGL_API 04. シェーダが正しくコンパイルされたかチェック
-	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-		throw (
-			(type === gl.VERTEX_SHADER ? "Vertex" : "Fragment") + " failed to compile:\n\n" + gl.getShaderInfoLog(shader));
-	}
-
-	return shader;
-};
-
-ShaderProgram.prototype.createShaderProgram = function(gl, vertex_shader, fragment_shader) {
-	// WebGL_API 05. プログラムオブジェクトの生成
-	var shaderProgram = gl.createProgram();
-
-	// WebGL_API 06. プログラムオブジェクトにシェーダを割り当てる
-	gl.attachShader(shaderProgram, vertex_shader);
-	gl.attachShader(shaderProgram, fragment_shader);
-
-	// WebGL_API 07. シェーダをリンク
-	gl.linkProgram(shaderProgram);
-
-	// WebGL_API 08. シェーダのリンクが正しく行なわれたかチェック
-	if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-		throw new Error("Could not initialize shaders:\n\n" + gl.getProgramInfoLog(shaderProgram));
-	}
-
-	// WebGL_API 19. プログラムを有効にする
-	gl.useProgram(shaderProgram);
-
-	return shaderProgram;
-};
-
-ShaderProgram.prototype.useProgram = function() {
-	// WebGL_API 19. プログラムを有効にする
-	this.gl.useProgram(this.shader_program);
-};
-
-module.exports = ShaderProgram;
-
-},{"gl-matrix":2}]},{},[32]);
+},{}],54:[function(require,module,exports){
+arguments[4][43][0].apply(exports,arguments)
+},{"dup":43}]},{},[48]);
