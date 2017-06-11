@@ -2,9 +2,32 @@
 var base_object = require('../hakurei').object.sprite3d;
 var util = require('../hakurei').util;
 var glmat = require('gl-matrix');
+var ShaderProgram = require('../hakurei').shader_program;
+var VS = require("../shader/main.vs");
+var FS = require("../shader/main.fs");
+
 
 var Background = function (scene) {
 	base_object.apply(this, arguments);
+
+	this.shader_program = new ShaderProgram(
+		this.core.gl,
+		VS, FS,
+		[
+			"aTextureCoordinates",
+			"aVertexPosition",
+			"aColor"
+		],
+		[
+			"uMVMatrix",
+			"uPMatrix",
+			"uSampler", // texture data
+			"uFighterX",
+			"uFighterY",
+			"uTime",
+			"uLight",
+		]
+	);
 };
 util.inherit(Background, base_object);
 
@@ -77,6 +100,21 @@ Background.prototype._setPerspectiveProjection = function() {
 	var far  = 10.0;
 	glmat.mat4.perspective(this.pMatrix, 120, this.core.width / this.core.height, near, far);
 };
+
+Background.prototype.shader = function(){
+	return this.shader_program;
+};
+
+Background.prototype.setupAdditionalVariables = function(){
+	var gl = this.core.gl;
+	var shader = this.shader();
+
+	gl.uniform1i(shader.uniform_locations.uTime, this.frame_count);
+	gl.uniform1f(shader.uniform_locations.uFighterX, this.scene.player.x());
+	gl.uniform1f(shader.uniform_locations.uFighterY, this.core.height - this.scene.player.y());
+	gl.uniform1i(shader.uniform_locations.uLight, true);
+};
+
 
 
 
